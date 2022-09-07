@@ -241,7 +241,7 @@ try:
             last_refresh = time.time()
         else:
             time.sleep(0.05)
-except Exception, e:
+except Exception as e:
     exit_gracefully(None, None)
     raise
 
