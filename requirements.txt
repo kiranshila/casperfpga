@@ -7,3 +7,4 @@ tornado
 redis
 tftpy
 progressbar2
+requests

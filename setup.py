@@ -61,6 +61,7 @@ setuptools.setup(
         'redis',
         'tftpy',
         'progressbar2',
+        'requests'
     ],
     extras_require = {'test': ['pytest', 'pytest-datadir']},
     packages=['casperfpga', 'casperfpga.debug', 'casperfpga.progska'],
