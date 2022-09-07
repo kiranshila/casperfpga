@@ -51,7 +51,6 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     # Specify version in-line here
     install_requires=[
-        'IPython',
         'future',
         'numpy',
         'katcp~=0.9.1',
@@ -62,8 +61,6 @@ setuptools.setup(
         'redis',
         'tftpy',
         'progressbar2',
-        'requests',
-        'circus'
     ],
     extras_require = {'test': ['pytest', 'pytest-datadir']},
     packages=['casperfpga', 'casperfpga.debug', 'casperfpga.progska'],
