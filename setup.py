@@ -79,7 +79,7 @@ setuptools.setup(
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
         'Programming Language :: Python :: 3.8',
         'Operating System :: OS Independent',
-	    'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Scientific/Engineering :: Astronomy',
     ]
 )
