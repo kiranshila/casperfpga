@@ -51,14 +51,12 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     # Specify version in-line here
     install_requires=[
-        'IPython',
         'future',
         'numpy',
-        'katcp==0.9.1',
+        'aiokatcp',
         'katversion',
         'odict',
         'setuptools',
-        'tornado',
         'redis',
         'tftpy',
         'progressbar2',
