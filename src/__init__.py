@@ -7,7 +7,7 @@ from . import progska
 from .bitfield import Bitfield, Field
 from .katadc import KatAdc
 from .casperfpga import CasperFpga
-from .transport_katcp import KatcpTransport
+from .transport_aiokatcp import KatcpTransport
 from .transport_tapcp import TapcpTransport
 from .transport_skarab import SkarabTransport
 from .transport_itpm import ItpmTransport
