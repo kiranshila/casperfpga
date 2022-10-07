@@ -6,3 +6,4 @@ odict
 redis
 tftpy
 progressbar2
+async-timeout

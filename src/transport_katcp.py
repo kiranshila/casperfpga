@@ -1,5 +1,5 @@
 import logging
-import katcp
+import aiokatcp
 import time
 import os
 import threading
@@ -10,75 +10,39 @@ import struct
 import contextlib
 
 from .transport import Transport
-from .utils import create_meta_dictionary, get_hostname, get_kwarg, socket_closer
+from .utils import create_meta_dictionary, get_kwarg, socket_closer
 
 LOGGER = logging.getLogger(__name__)
 
-# monkey-patch the maximum katcp message size
-if hasattr(katcp.CallbackClient, 'MAX_MSG_SIZE'):
-    setattr(katcp.CallbackClient, 'MAX_MSG_SIZE',
-            katcp.CallbackClient.MAX_MSG_SIZE * 10)
-
-if hasattr(katcp.CallbackClient, 'MAX_WRITE_BUFFER_SIZE'):
-    setattr(katcp.CallbackClient, 'MAX_WRITE_BUFFER_SIZE',
-            katcp.CallbackClient.MAX_WRITE_BUFFER_SIZE * 10)
-
 
 class KatcpConnectionError(Exception):
+    """An error occurred while connecting to a KATCP client"""
+
     pass
 
 
 class KatcpRequestError(RuntimeError):
     """An error occurred processing a KATCP request."""
+
     pass
 
 
 class KatcpRequestInvalid(RuntimeError):
     """An invalid KATCP request was made."""
+
     pass
 
 class KatcpRequestFail(RuntimeError):
     """A valid KATCP request failed."""
+
     pass
 
-# Moved to inside the KatcpTransport class to make use of the logger passed through from casperfpga.py
-# def sendfile(filename, targethost, port, result_queue, timeout=2):
-#     """
-#     Send a file to a host using sockets. Place the result of the
-#     action in a Queue.Queue
-#     :param filename: the file to send
-#     :param targethost: the host to which it must be sent
-#     :param port: the port the host should open
-#     :param result_queue: the result of the upload, nothing '' indicates success
-#     :param timeout:
-#     :return:
-#     """
-#     with contextlib.closing(socket.socket()) as upload_socket:
-#         stime = time.time()
-#         connected = False
-#         while (not connected) and (time.time() - stime < timeout):
-#             try:
-#                 upload_socket.connect((targethost, port))
-#                 connected = True
-#             except socket.error:
-#                 time.sleep(0.1)
-#         if not connected:
-#             result_queue.put('Could not connect to upload port.')
-#         try:
-#             upload_socket.send(open(filename).read())
-#             result_queue.put('')
-#         except Exception as e:
-#             result_queue.put('Could not send file to upload port(%i): '
-#                              '%s' % (port, e.message))
-#         finally:
-#             LOGGER.info('%s: upload thread complete at %.3f' %
-#                         (targethost, time.time()))
 
+class KatcpTransport(Transport, aiokatcp.Client):
+    """
+    A katcp transport client for a casperfpga object.
+    """
 
-class KatcpTransport(Transport, katcp.CallbackClient):
-    """
-    A katcp transport client for a casperfpga object
-    """
     def __init__(self, **kwargs):
         """
 
@@ -90,12 +54,6 @@ class KatcpTransport(Transport, katcp.CallbackClient):
         port = get_kwarg('port', kwargs, 7147)
         timeout = get_kwarg('timeout', kwargs, 10)
         Transport.__init__(self, **kwargs)
-
-        # Create instance of self.logger
-        # try:
-        #     self.logger = kwargs['logger']
-        # except KeyError:
-        #     self.logger = logging.getLogger(__name__)
 
         try:
             self.parent = kwargs['parent_fpga']
