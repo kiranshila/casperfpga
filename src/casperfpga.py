@@ -26,7 +26,7 @@ from . import rfdc
 
 from .attribute_container import AttributeContainer
 from .utils import parse_fpg, get_hostname, get_kwarg, get_git_info_from_fpg
-from .transport_katcp import KatcpTransport
+from .transport_aiokatcp import KatcpTransport
 from .transport_tapcp import TapcpTransport
 from .transport_skarab import SkarabTransport
 from .transport_dummy import DummyTransport
