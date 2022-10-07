@@ -1,6 +1,9 @@
-import asyncio
+"""
+CasperFPGA transport using the aiokatcp backend for talking to KATCP (>=v5) clients.
+"""
+
 import aiokatcp
-from async_timeout import timeout
+import async_timeout as aio_to
 
 from .transport import Transport
 from .casperfpga import CasperFpga
@@ -23,7 +26,6 @@ class KatcpTransport(Transport):
     def __init__(
         self, host: str, parent: CasperFpga, port: int = KATCP_PORT, timeout: int = 10
     ):
-        """_summary_"""
         # Setup our class
         self.host = host
         self.port = port
@@ -44,7 +46,7 @@ class KatcpTransport(Transport):
 
     @staticmethod
     async def _async_connect(host: str, port: int, timeout: int) -> aiokatcp.Client:
-        async with timeout(timeout) as cm:
+        async with aio_to.timeout(timeout) as cm:
             client = await aiokatcp.Client.connect(host, port)
         if not cm.expired():
             return client
