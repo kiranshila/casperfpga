@@ -2,11 +2,11 @@
 CasperFPGA transport using the aiokatcp backend for talking to KATCP (>=v5) clients.
 """
 
+import asyncio
 import aiokatcp
 import async_timeout as aio_to
 
 from .transport import Transport
-from .casperfpga import CasperFpga
 
 KATCP_PORT = 7147
 
@@ -24,7 +24,11 @@ class KatcpTransport(Transport):
     """A katcp transport client for a casperfpga object using the aiokatcp backend."""
 
     def __init__(
-        self, host: str, parent: CasperFpga, port: int = KATCP_PORT, timeout: int = 10
+        self,
+        host: str,
+        parent_fpga,
+        port: int = KATCP_PORT,
+        timeout: int = 10,
     ):
         # Setup our class
         self.host = host
@@ -34,9 +38,9 @@ class KatcpTransport(Transport):
         Transport.__init__(self, host=host)
         # Create a reference to the parent instance
         # and its logger and its event loop
-        self.parent = parent
-        self.logger = parent.logger
-        self.loop = parent.loop
+        self.parent = parent_fpga
+        self.logger = parent_fpga.logger
+        self.loop = parent_fpga.loop
         # Create and connect to the client
         self.loop.run_until_complete(self._async_connect(host, port, timeout))
         # Either this threw an error, or we've conected
@@ -57,7 +61,9 @@ class KatcpTransport(Transport):
     def test_host_type(host_ip: str, timeout: int = 5):
         """Test if the device at `host_ip` is a katcp client."""
         try:
-            KatcpTransport._async_connect(host_ip, KATCP_PORT, timeout)
+            asyncio.get_event_loop().run_until_complete(
+                KatcpTransport._async_connect(host_ip, KATCP_PORT, timeout)
+            )
             return True
         except KatcpTimeoutError:
             return False

@@ -30,7 +30,8 @@ from .transport_aiokatcp import KatcpTransport
 from .transport_tapcp import TapcpTransport
 from .transport_skarab import SkarabTransport
 from .transport_dummy import DummyTransport
-from .transport_alveo import AlveoTransport
+
+# from .transport_alveo import AlveoTransport
 from .casper_platform_id_map import PLATFORM_ID
 
 from .CasperLogHandlers import configure_console_logging, configure_file_logging
@@ -199,9 +200,9 @@ class CasperFpga(object):
                 self.logger.info("%s seems to be a SKARAB" % host_ip)
                 return SkarabTransport
             # must test for Alveo transport before Katcp transport (since alveo inherits from katcp)
-            elif AlveoTransport.test_host_type(host_ip, port):
-                self.logger.info("%s:%d seems to be an ALVEO" % (host_ip, port))
-                return AlveoTransport
+            # elif AlveoTransport.test_host_type(host_ip, port):
+            #     self.logger.info("%s:%d seems to be an ALVEO" % (host_ip, port))
+            #     return AlveoTransport
             elif KatcpTransport.test_host_type(host_ip):
                 self.logger.info("%s seems to be ROACH" % host_ip)
                 return KatcpTransport
