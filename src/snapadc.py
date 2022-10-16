@@ -59,18 +59,17 @@ class SnapAdc():
     ERROR_FRAME = 4
     ERROR_RAMP = 5
 
-    def __init__(self, host, ADC='HMCAD1511', resolution=8, ref=10,
-                 logger=None, **kwargs):
+    def __init__(self, parent, ADC='HMCAD1511', resolution=8, ref=10, **kwargs):
         """
         Instantiate an ADC block.
 
         Inputs:
-           host (casperfpga.Casperfpga): Host FPGA
+           parent (casperfpga.Casperfpga): Parent CasperFpga instance
            num_chans (int): Number of channels per ADC chip. Valid values are 1, 2, or 4.
            resolution (int): Bit resolution of the ADC. Valid values are 8, 12.
            ref (float): Reference frequency (in MHz) from which ADC clock is derived. If None, an external sampling clock must be used.
         """
-        self.logger = logger
+        self.logger = kwargs.get("logger", logging.getLogger(__name__))
         # Purposely setting ref=None below to prevent LMX object
         # from being attached so we can do it ourselves
 
@@ -80,13 +79,11 @@ class SnapAdc():
         self.clksw = None
         self.ram = None
 
-        self.logger = kwargs.get('logger', logging.getLogger(__name__))
-
         # Current delay tap settings for all IDELAYE2
         self.curDelay = None
         
-        # host => casperfpga.CasperFpga(hostname/ip)
-        self.host = host
+        # parent => casperfpga.CasperFpga(hostname/ip)
+        self.parent = parent
 
         self.A_WB_R_LIST = [self.WB_DICT.index(a) for a in self.WB_DICT if a != None]
         self.adcList = [0, 1, 2]
@@ -94,27 +91,26 @@ class SnapAdc():
         self.laneList = [0, 1, 2, 3, 4, 5, 6, 7]
 
         if self.resolution not in [8,12,14]:
-            logger.error("Invalid resolution parameter")
+            self.logger.error("Invalid resolution parameter")
             raise ValueError("Invalid resolution parameter")
         
         self.curDelay = [[0]*len(self.laneList)]*len(self.adcList)
-        #self.curDelay = np.zeros((len(self.adcList),len(self.laneList)))
 
-        #if ref is not None:
-        #    self.lmx = LMX2581(host,'lmx_ctrl', fosc=ref)
-        #else:
-        #    self.lmx = None
+        if parent.devices['SNAP']['clk_src'] == 'sys_clk':
+           self.lmx = LMX2581(parent, 'lmx_ctrl', fosc=ref)
+        else:
+           self.lmx = None
 
-        self.clksw = HMC922(host,'adc16_use_synth')
-        self.ram = [WishBoneDevice(host,name) for name in self.ramList]
+        self.clksw = HMC922(parent,'adc16_use_synth')
+        self.ram = [WishBoneDevice(parent,name) for name in self.ramList]
 
         if ADC not in ['HMCAD1511','HMCAD1520']:
             raise ValueError("Invalid parameter")
 
         if ADC == 'HMCAD1511':
-            self.adc = HMCAD1511(host,'adc16_controller')
+            self.adc = HMCAD1511(parent,'adc16_controller')
         else:   # 'HMCAD1520'
-            self.adc = HMCAD1520(host,'adc16_controller')
+            self.adc = HMCAD1520(parent,'adc16_controller')
 
         # test pattern for clock aligning
         pats = [0b10101010,0b01010101,0b00000000,0b11111111]
@@ -125,14 +121,11 @@ class SnapAdc():
 
         # below is from hera_corr_f/blocks.py
         # Attach our own wrapping of LMX
-        self.lmx = LMX2581(host, 'lmx_ctrl', fosc=ref)
         self.name            = 'SNAP_adc'
         self.clock_divide    = 1
         self.resolution      = resolution
-        self.host = host # the SNAPADC class doesn't directly expose this
         self.working_taps = {}
         self._retry_cnt = 0
-        #self._retry = kwargs.get('retry',7)
         self._retry = kwargs.get('retry',20)
         self._retry_wait = kwargs.get('retry_wait',1)
 
@@ -254,7 +247,7 @@ class SnapAdc():
 
         # ADC init/lmx select messes with FPGA clock, so reprogram
         self.logger.debug('Reprogramming the FPGA for ADCs')
-        self.host.transport.prog_user_image()
+        self.parent.transport.prog_user_image()
         self.selectADC()
         self.logger.debug('Reprogrammed')
 
