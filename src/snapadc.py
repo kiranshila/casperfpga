@@ -22,7 +22,7 @@ ERROR_STRING = 'UNKNOWN' # default string for status reports if comms are broken
 logger = logging.getLogger(__name__)
 
 # Some codes and docstrings are copied from https://github.com/UCBerkeleySETI/snap_control
-class SnapAdc(object):
+class SnapAdc():
 
     # Wishbone address and mask for read
     WB_DICT = [None] * ((0b11 << 2) + 1)
